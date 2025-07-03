@@ -1,14 +1,21 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import stylesplashscreen from '../stylesheets/stylesplashscreen';
 
 const SplashScreen = ({ navigation }) => {
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.replace('Login'); // Navigate after 5 seconds
-    }, 3000);
+    const unsubscribe = auth().onAuthStateChanged((user) => {
+      setTimeout(() => {
+        if (user) {
+          navigation.replace('Home', { Useremail: user.email });
+        } else {
+          navigation.replace('Login');
+        }
+      }, 2000); // optional delay for logo animation
+    });
 
-    return () => clearTimeout(timer); // Cleanup
+    return unsubscribe;
   }, [navigation]);
 
   return (
