@@ -12,11 +12,15 @@ import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import imageMap from '../assets/imageMap';
 import Hstyles from '../stylesheets/Hstyles';
+import GoToCart from '../components/GoToCart';
+
 
 const Home = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Food');
   const [foodItems, setFoodItems] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
+  const [userProfile, setUserProfile] = useState(null);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const navigateTo = (tab) => {
@@ -41,13 +45,108 @@ const Home = ({ navigation }) => {
       }
     };
 
+    const fetchUserProfile = async () => {
+      try {
+        const user = auth().currentUser;
+        if (user) {
+          const doc = await firestore().collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            setUserProfile(doc.data());
+          }
+        }
+      } catch (err) {
+        console.log('Error fetching profile:', err);
+      }
+    };
+
+    const fetchOrders = async () => {
+      try {
+        const user = auth().currentUser;
+        if (user) {
+          const snapshot = await firestore()
+            .collection('orders')
+            .doc(user.uid)
+            .collection('userOrders')
+            .orderBy('timestamp', 'desc')
+            .get();
+
+          const orderData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setOrders(orderData);
+        }
+      } catch (err) {
+        console.log('Error fetching orders:', err);
+      }
+    };
+
     fetchData();
+    fetchUserProfile();
+    fetchOrders();
   }, []);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const user = auth().currentUser;
+        if (user) {
+          const doc = await firestore().collection('users').doc(user.uid).get();
+          if (doc.exists) {
+            setUserProfile(doc.data());
+          }
+        }
+      } catch (err) {
+        console.log('Error fetching profile:', err);
+      }
+    };
+
+    const fetchOrders = async () => {
+      try {
+        const user = auth().currentUser;
+        if (user) {
+          const snapshot = await firestore()
+            .collection('orders')
+            .doc(user.uid)
+            .collection('userOrders')
+            .orderBy('timestamp', 'desc')
+            .get();
+
+          const orderData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setOrders(orderData);
+        }
+      } catch (err) {
+        console.log('Error fetching orders:', err);
+      }
+    };
+
+    if (activeTab === 'Profile') {
+      fetchUserProfile();
+    } else if (activeTab === 'Orders') {
+      fetchOrders();
+    }
+  }, [activeTab]);
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp?.toDate) return '';
+    const date = timestamp.toDate();
+    return date.toLocaleString();
+  };
 
   return (
     <View style={Hstyles.container}>
       <View style={Hstyles.topBanner}>
         <Text style={Hstyles.appName}>DelishGo</Text>
+
+        {(activeTab === 'Food' || activeTab === 'Restaurants') && (
+         <GoToCart />
+        )}
+
         <Text style={Hstyles.quote}>"Delivering delights to your doorstep"</Text>
       </View>
 
@@ -61,7 +160,14 @@ const Home = ({ navigation }) => {
                 <Text style={Hstyles.sectionTitle}>Food Items</Text>
                 <View style={Hstyles.itemRowWrap}>
                   {foodItems.map(item => (
-                    <FoodCard key={item.id} label={item.name} image={imageMap[item.image]} />
+                    <FoodCard
+                      key={item.id}
+                      label={item.name}
+                      image={imageMap[item.image]}
+                      onPress={() => navigation.navigate('FoodItems', {
+                        category: item.name,
+                      })}
+                    />
                   ))}
                 </View>
 
@@ -73,6 +179,10 @@ const Home = ({ navigation }) => {
                     type={rest.type}
                     time={rest.time}
                     image={imageMap[rest.image]}
+                    onPress={() => navigation.navigate('RestaurantDetails', {
+                      restaurantId: rest.id,
+                      restaurantData: rest
+                    })}
                   />
                 ))}
               </View>
@@ -88,6 +198,10 @@ const Home = ({ navigation }) => {
                     type={rest.type}
                     time={rest.time}
                     image={imageMap[rest.image]}
+                    onPress={() => navigation.navigate('RestaurantDetails', {
+                      restaurantId: rest.id,
+                      restaurantData: rest
+                    })}
                   />
                 ))}
               </View>
@@ -96,16 +210,54 @@ const Home = ({ navigation }) => {
             {activeTab === 'Orders' && (
               <View>
                 <Text style={Hstyles.sectionTitle}>Your Orders</Text>
-                <Text style={Hstyles.empty}>You have no orders yet.</Text>
+                {orders.length === 0 ? (
+                  <Text style={Hstyles.empty}>You have no orders yet.</Text>
+                ) : (
+                  orders.map(order => (
+                    <View key={order.id} style={Hstyles.orderCard}>
+                      <Text style={Hstyles.orderHeading}>Order ID: {order.id}</Text>
+                      <Text style={Hstyles.orderSub}>Placed: {formatTimestamp(order.timestamp)}</Text>
+                      <Text style={Hstyles.orderSub}>Est. Delivery: 30-40 mins</Text>
+
+                      <Text style={Hstyles.orderSub}>Items:</Text>
+                      {order.items.map((item, index) => (
+                        <Text key={index} style={Hstyles.orderItem}>
+                          - {item.name} x {item.quantity}
+                        </Text>
+                      ))}
+
+                      <Text style={Hstyles.orderSub}>Total: ₹{order.total}</Text>
+
+                      <Text style={Hstyles.orderSub}>Delivery Address:</Text>
+                      <Text style={Hstyles.orderAddress}>
+                        {order.address?.lane1}, {order.address?.lane2}{'\n'}
+                        {order.address?.city}, {order.address?.district}, {order.address?.state} - {order.address?.pincode}
+                      </Text>
+                    </View>
+                  ))
+                )}
               </View>
             )}
 
             {activeTab === 'Profile' && (
               <View>
                 <Text style={Hstyles.sectionTitle}>Your Profile</Text>
-                <Text style={Hstyles.profileText}>
-                  Email: {auth().currentUser?.email || 'Not logged in'}
-                </Text>
+                <View style={{ padding: 10 }}>
+                  <Text style={Hstyles.profileText}>Name: {userProfile?.name || 'N/A'}</Text>
+                  <Text style={Hstyles.profileText}>Phone: {userProfile?.phone || 'N/A'}</Text>
+                  <Text style={Hstyles.profileText}>Email: {auth().currentUser?.email || 'Not logged in'}</Text>
+                  <Text style={Hstyles.profileText}>Address:</Text>
+                  {userProfile?.address ? (
+                    <Text style={Hstyles.profileText}>
+                      {userProfile.address.lane1}, {userProfile.address.lane2}{'\n'}
+                      {userProfile.address.city}, {userProfile.address.district}{'\n'}
+                      {userProfile.address.state} - {userProfile.address.pincode}
+                    </Text>
+                  ) : (
+                    <Text style={Hstyles.profileText}>No address found</Text>
+                  )}
+                </View>
+
                 <TouchableOpacity
                   style={Hstyles.logoutButton}
                   onPress={async () => {
@@ -121,7 +273,6 @@ const Home = ({ navigation }) => {
         )}
       </View>
 
-      {/* Bottom Navigation */}
       <View style={Hstyles.bottomNav}>
         <NavButton
           icon={imageMap.foodIcon}
@@ -152,19 +303,19 @@ const Home = ({ navigation }) => {
   );
 };
 
-const FoodCard = ({ label, image }) => (
-  <View style={Hstyles.card}>
+const FoodCard = ({ label, image, onPress }) => (
+  <TouchableOpacity style={Hstyles.card} onPress={onPress}>
     <Image source={image} style={Hstyles.cardImage} />
     <Text style={Hstyles.cardLabel}>{label}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
-const RestaurantCard = ({ name, type, time, image }) => (
-  <View style={Hstyles.restaurantCard}>
+const RestaurantCard = ({ name, type, time, image, onPress }) => (
+  <TouchableOpacity style={Hstyles.restaurantCard} onPress={onPress}>
     <Image source={image} style={Hstyles.restaurantImage} />
     <Text style={Hstyles.restaurantName}>{name}</Text>
     <Text style={Hstyles.restaurantInfo}>{type} • {time}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 const NavButton = ({ icon, label, active, onPress }) => (
@@ -173,7 +324,6 @@ const NavButton = ({ icon, label, active, onPress }) => (
     <Text style={[Hstyles.navLabel, active && Hstyles.navLabelActive]}>{label}</Text>
   </TouchableOpacity>
 );
-
 
 
 export default Home;

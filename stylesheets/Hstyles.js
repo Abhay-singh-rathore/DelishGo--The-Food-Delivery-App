@@ -148,6 +148,101 @@ export default StyleSheet.create( {
     fontWeight: 'bold',
     fontSize: 16,
   },
+  cartIconButton: {
+  position: 'absolute',
+  right: 20,
+  top: 55,
+  zIndex: 10,
+},
+cartIcon: {
+  width: 26,
+  height: 26,
+  tintColor: '#fff',
+},
+categoryTitle: {
+  fontSize: 18,
+  fontWeight: '600',
+  marginLeft: 10,
+  marginBottom: 8,
+  marginTop: 15,
+  color: '#FF6F00',
+},
+
+ orderCard: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    elevation: 3,
+    marginHorizontal: 10,
+  },
+  orderHeading: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#FF6F00',
+    marginBottom: 4,
+  },
+  orderSub: {
+    fontSize: 14,
+    marginTop: 6,
+    color: '#333',
+  },
+  orderItem: {
+    marginLeft: 10,
+    color: '#555',
+  },
+  orderAddress: {
+    marginTop: 4,
+    fontSize: 14,
+    color: '#444',
+  },
+   profileContainer: {
+    backgroundColor: '#fff',
+    padding: 15,
+    margin: 10,
+    borderRadius: 12,
+    elevation: 3,
+  },
+  profileLabel: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#FF6F00',
+    marginTop: 10,
+  },
+  profileValue: {
+    fontSize: 15,
+    color: '#333',
+    marginTop: 2,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF6F00',
+    marginTop: 20,
+    marginHorizontal: 10,
+    marginBottom: 10,
+  },
+    profileContainer: {
+    backgroundColor: '#fff',
+    padding: 16,
+    margin: 10,
+    borderRadius: 12,
+    elevation: 3,
+  },
+  profileLabel: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    color: '#FF6F00',
+    marginTop: 10,
+  },
+  profileValue: {
+    fontSize: 15,
+    color: '#333',
+    marginTop: 2,
+  },
+
+
+
 });
 
 
