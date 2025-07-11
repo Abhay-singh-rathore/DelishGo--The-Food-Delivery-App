@@ -124,7 +124,26 @@ const AddressScreen = ({route}) => {
       console.error('Error placing order:', error);
       Alert.alert('Error', 'Something went wrong while placing your order.');
     }
+
+    
   };
+
+
+
+
+  useEffect(() => {
+  if (selectedLocation) {
+    console.log('📍 Autofilling from selected location:', selectedLocation);
+
+    setLane1(selectedLocation.line1 || '');
+    setLane2(selectedLocation.line2 || '');
+    setCity(selectedLocation.city || '');
+    setDistrict(selectedLocation.district || '');
+    setStateName(selectedLocation.state || '');
+    setPincode(selectedLocation.pincode || '');
+  }
+}, [selectedLocation]);
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
