@@ -1,6 +1,6 @@
 # 🍔 DelishGo — The Food Delivery App
 
-<img src="./screenshots/banner.png" alt="DelishGo" width="600"/>
+<img src="./screenshots/banner.png" alt="DelishGo" width="100"/>
 
 
 [![React Native](https://img.shields.io/badge/Built%20With-React%20Native-blue.svg)](https://reactnative.dev/)
