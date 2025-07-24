@@ -1,45 +1,62 @@
-# 🍕 DelishGo — The Ultimate Food Delivery App
+# 🍔 DelishGo — The Food Delivery App
 
-[![React Native](https://img.shields.io/badge/React%20Native-2025-blue?logo=react&logoColor=white)](https://reactnative.dev/)
-[![Firebase](https://img.shields.io/badge/Firebase-Backend-orange?logo=firebase)](https://firebase.google.com/)
-[![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-State_Management-purple?logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![DelishGo](./screenshots/banner.png)
 
-> A sleek, modern and full-featured React Native food delivery app. Built for performance. Designed for users. Powered by Firebase.
+[![React Native](https://img.shields.io/badge/Built%20With-React%20Native-blue.svg)](https://reactnative.dev/)
+[![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28.svg)](https://firebase.google.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
----
-
-## 🚀 Features
-
-✅ Firebase Authentication  
-✅ Google Sign-In  
-✅ Browse Restaurants & Dishes  
-✅ Food Category Filtering  
-✅ Add to Cart + Quantity Updates  
-✅ Address Picker with Maps & Geolocation  
-✅ Clean UI with Modular Architecture  
-✅ Redux Toolkit for State Management  
-✅ Realtime Firestore Integration  
-✅ Push Notifications (FCM + Notifee)
+A modern, feature-rich food delivery app built with **React Native CLI**, featuring Firebase Authentication, Firestore, Google Maps, Cart functionality, Category-based browsing, and more — inspired by Swiggy/Zomato.
 
 ---
 
-## 📲 Tech Stack
+## ✨ Features
 
-| Layer        | Tech                                  |
-|--------------|----------------------------------------|
-| Frontend     | React Native CLI (JavaScript)          |
-| Navigation   | React Navigation                       |
-| State        | Redux Toolkit                          |
-| Backend      | Firebase (Auth, Firestore, FCM)        |
-| Location     | Google Maps API, Geolocation           |
-| UI Kit       | Custom Styles + Vector Icons           |
+- 🔐 **Authentication** — Sign in / Register with Email or Google
+- 📍 **Location Picker** — Use Google Maps to pick delivery address
+- 🍽️ **Food & Restaurant Listing** — Categorized & filtered menu
+- 🛒 **Add to Cart** — Smart cart with quantity control
+- 🧾 **Order Summary** — Preview orders before checkout
+- 🔍 **Search & Filters** — Find dishes and restaurants quickly
+- 🌗 **Beautiful UI** — Clean, animated, modern UI/UX
 
 ---
 
-## 📸 Preview (Screenshots)
+## 📸 Screenshots
 
-> _Coming Soon!_ Add your screenshots in a `screenshots/` folder and reference them here.
+| Splash Screen | Home Screen | Restaurant Details | Cart |
+|---------------|-------------|---------------------|------|
+| ![](./screenshots/splash.png) | ![](./screenshots/home.png) | ![](./screenshots/restaurant.png) | ![](./screenshots/cart.png) |
+
+> 📂 Place all screenshots inside a `/screenshots` folder in your repo.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** React Native CLI, Redux Toolkit, React Navigation
+- **Backend:** Firebase Authentication, Firestore DB
+- **Notifications:** Firebase Cloud Messaging (FCM)
+- **Location:** React Native Maps, Geolocation
+- **UI Components:** React Native Paper, Custom Styling
+
+---
+
+## 📦 Installation
 
 ```bash
-📱 Splash → Login → Home → Restaurant → Food → Cart → Checkout
+# 1. Clone the repo
+git clone https://github.com/Abhay-singh-rathore/DelishGo--The-Food-Delivery-App.git
+cd DelishGo--The-Food-Delivery-App
+
+# 2. Install dependencies
+npm install
+
+# 3. Link native dependencies (only for older RN versions)
+npx react-native link
+
+# 4. Run on Android
+npx react-native run-android
+
+# 5. Run on iOS (Mac only)
+npx react-native run-ios
