@@ -1,6 +1,6 @@
 # 🍔 DelishGo — The Food Delivery App
 
-![DelishGo](./screenshots/banner.png)
+<img src="./screenshots/banner.png" alt="DelishGo Banner" width="100%" />
 
 [![React Native](https://img.shields.io/badge/Built%20With-React%20Native-blue.svg)](https://reactnative.dev/)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28.svg)](https://firebase.google.com/)
@@ -24,9 +24,32 @@ A modern, feature-rich food delivery app built with **React Native CLI**, featur
 
 ## 📸 Screenshots
 
-| Splash Screen | Home Screen | Restaurant Details | Cart |Add Item |Address Screen|Order Details
-|---------------|-------------|---------------------|------|
-| ![](./screenshots/Screenshot_1.png) | ![](./screenshots/Screenshot_2.png) | ![](./screenshots/Screenshot_5.png) | ![](./screenshots/Screenshot_8.png) | ![](./screenshots/Screenshot_4.png) | ![](./screenshots/Screenshot_9.png) | ![](./screenshots/Screenshot_6.png) |
+<table>
+  <tr>
+    <td><img src="./screenshots/Screenshot_1.png" width="200" /></td>
+    <td><img src="./screenshots/Screenshot_2.png" width="200" /></td>
+    <td><img src="./screenshots/Screenshot_5.png" width="200" /></td>
+    <td><img src="./screenshots/Screenshot_8.png" width="200" /></td>
+  </tr>
+  <tr>
+    <td>Splash Screen</td>
+    <td>Home Screen</td>
+    <td>Restaurant Details</td>
+    <td>Cart</td>
+  </tr>
+  <tr>
+    <td><img src="./screenshots/Screenshot_4.png" width="200" /></td>
+    <td><img src="./screenshots/Screenshot_9.png" width="200" /></td>
+    <td><img src="./screenshots/Screenshot_6.png" width="200" /></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Add Item</td>
+    <td>Address Screen</td>
+    <td>Order Details</td>
+    <td></td>
+  </tr>
+</table>
 
 > 📂 Place all screenshots inside a `/screenshots` folder in your repo.
 
