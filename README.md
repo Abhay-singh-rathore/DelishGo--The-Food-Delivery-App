@@ -24,9 +24,9 @@ A modern, feature-rich food delivery app built with **React Native CLI**, featur
 
 ## 📸 Screenshots
 
-| Splash Screen | Home Screen | Restaurant Details | Cart |
+| Splash Screen | Home Screen | Restaurant Details | Cart |Add Item |Address Screen|Order Details
 |---------------|-------------|---------------------|------|
-| ![](./screenshots/splash.png) | ![](./screenshots/home.png) | ![](./screenshots/restaurant.png) | ![](./screenshots/cart.png) |
+| ![](./screenshots/Screenshot_1.png) | ![](./screenshots/Screenshot_2.png) | ![](./screenshots/Screenshot_5.png) | ![](./screenshots/Screenshot_8.png) | ![](./screenshots/Screenshot_4.png) | ![](./screenshots/Screenshot_9.png) | ![](./screenshots/Screenshot_6.png) |
 
 > 📂 Place all screenshots inside a `/screenshots` folder in your repo.
 
