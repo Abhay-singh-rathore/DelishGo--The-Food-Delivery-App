@@ -1,43 +1,45 @@
-
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet ,Image} from 'react-native';
+import { TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import imageMap from '../assets/imageMap';
-
 
 const GoToCart = () => {
   const navigation = useNavigation();
 
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={styles.cartButton}
       onPress={() => navigation.navigate('Cart')}
     >
-      <Image source={imageMap.cartIcon} style={styles.cartIcon} />
+      <Image
+        source={imageMap.cartIcon}
+        style={styles.cartIcon}
+        resizeMode="contain"
+      />
     </TouchableOpacity>
   );
 };
 
-export default GoToCart;
-
 const styles = StyleSheet.create({
-  button: {
+  cartButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
     backgroundColor: '#FF6F00',
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginTop: 4,
-    alignSelf: 'flex-end', // 👈 moves button to right
+    padding: 12,
+    borderRadius: 30,
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
   },
-
-cartIcon: {
-  width: 26,
-  height: 26,
-  tintColor: '#fff',
-},
-  text: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+  cartIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#fff',
   },
 });
+
+export default GoToCart;

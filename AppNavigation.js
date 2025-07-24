@@ -22,7 +22,7 @@ const AppNavigator = () => (
       <Stack.Screen name="Login" component={Login}  options={{ headerShown: false }}/>
       <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
       <Stack.Screen name="Signup" component={Signup} options={{ headerShown: false }}/>
-      <Stack.Screen name="FoodItems" component={FoodItems} options={{ headerShown: true }}/>
+      <Stack.Screen name="FoodItems" component={FoodItems} options={{ headerShown: false }}/>
 <Stack.Screen name="RestaurantDetails" component={RestaurantDetails} options={{ headerShown: false }} />
 
       <Stack.Screen name="Cart" component={Cart} />

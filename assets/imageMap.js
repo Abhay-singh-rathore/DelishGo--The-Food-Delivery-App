@@ -1,6 +1,6 @@
 const imageMap = {
-  'burger.png': require('./burger.png'),
-  'pizza.png': require('./pizza.png'),
+  'burger.png': require('./burger.jpeg'),
+  'pizza.png': require('./pizza.jpeg'),
   'asian.png': require('./asian.png'),
   'icecream.png': require('./icecream.png'),
   'sushi.jpg': require('./sushi.jpg'),
@@ -18,6 +18,15 @@ const imageMap = {
   'nandhini.jpeg': require('./nandhini.jpeg'),
   'paradise.jpeg': require('./paradise.jpeg'),
   'saravana.jpeg': require('./saravana.jpeg'),
+  'vegsushi.jpeg': require('./vegsushi.jpeg'),
+  'sushi.jpeg': require('./sushi.jpeg'),
+  'doublecheeseburger.jpeg': require('./doublecheeseburger.jpeg'),
+  'alooburger.jpeg': require('./alooburger.jpeg'),
+  'icecream.jpeg': require('./icecream.jpeg'),
+  'coldcoffee.jpeg': require('./coldcoffee.jpeg'),
+  'chickencurry.jpeg': require('./chickencurry.jpeg'),
+  'muttoncurry.jpeg': require('./muttoncurry.jpeg'),
+  
 
   // Icon mappings (bottom nav + top right)
   foodIcon: require('./food-icon.png'),

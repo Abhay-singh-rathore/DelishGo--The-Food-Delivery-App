@@ -7,13 +7,13 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import imageMap from '../assets/imageMap';
 import Hstyles from '../stylesheets/Hstyles';
 import GoToCart from '../components/GoToCart';
-
 
 const Home = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Food');
@@ -22,308 +22,336 @@ const Home = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const navigateTo = (tab) => {
-    setActiveTab(tab);
-  };
+  const fadeAnim = useState(new Animated.Value(0))[0];
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadInitialData = async () => {
       try {
-        const foodSnapshot = await firestore().collection('foodItems').get();
-        const restaurantSnapshot = await firestore().collection('restaurants').get();
-
+        const [foodSnapshot, restaurantSnapshot] = await Promise.all([
+          firestore().collection('foodItems').get(),
+          firestore().collection('restaurants').get(),
+        ]);
         const foodData = foodSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const restaurantData = restaurantSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
         setFoodItems(foodData);
         setRestaurants(restaurantData);
-      } catch (err) {
-        console.log('Error fetching data:', err);
+      } catch (error) {
+        console.log('Error loading data:', error);
       } finally {
         setLoading(false);
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
       }
     };
-
-    const fetchUserProfile = async () => {
-      try {
-        const user = auth().currentUser;
-        if (user) {
-          const doc = await firestore().collection('users').doc(user.uid).get();
-          if (doc.exists) {
-            setUserProfile(doc.data());
-          }
-        }
-      } catch (err) {
-        console.log('Error fetching profile:', err);
-      }
-    };
-
-    const fetchOrders = async () => {
-      try {
-        const user = auth().currentUser;
-        if (user) {
-          const snapshot = await firestore()
-            .collection('orders')
-            .doc(user.uid)
-            .collection('userOrders')
-            .orderBy('timestamp', 'desc')
-            .get();
-
-          const orderData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
-          setOrders(orderData);
-        }
-      } catch (err) {
-        console.log('Error fetching orders:', err);
-      }
-    };
-
-    fetchData();
-    fetchUserProfile();
-    fetchOrders();
+    loadInitialData();
   }, []);
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchUserData = async () => {
       try {
         const user = auth().currentUser;
-        if (user) {
-          const doc = await firestore().collection('users').doc(user.uid).get();
-          if (doc.exists) {
-            setUserProfile(doc.data());
-          }
-        }
-      } catch (err) {
-        console.log('Error fetching profile:', err);
-      }
-    };
+        if (!user) return;
 
-    const fetchOrders = async () => {
-      try {
-        const user = auth().currentUser;
-        if (user) {
-          const snapshot = await firestore()
+        if (activeTab === 'Profile') {
+          const profile = await firestore().collection('users').doc(user.uid).get();
+          if (profile.exists) setUserProfile(profile.data());
+        }
+
+        if (activeTab === 'Orders') {
+          const orderSnap = await firestore()
             .collection('orders')
             .doc(user.uid)
             .collection('userOrders')
             .orderBy('timestamp', 'desc')
             .get();
 
-          const orderData = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
+          const orderData = orderSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setOrders(orderData);
         }
-      } catch (err) {
-        console.log('Error fetching orders:', err);
+      } catch (error) {
+        console.log('Error fetching user data:', error);
       }
     };
 
-    if (activeTab === 'Profile') {
-      fetchUserProfile();
-    } else if (activeTab === 'Orders') {
-      fetchOrders();
-    }
+    fetchUserData();
   }, [activeTab]);
 
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp?.toDate) return '';
-    const date = timestamp.toDate();
-    return date.toLocaleString();
-  };
+  const formatTimestamp = (timestamp) =>
+    timestamp?.toDate ? timestamp.toDate().toLocaleString() : '';
 
   return (
     <View style={Hstyles.container}>
+      {/* Top Banner */}
       <View style={Hstyles.topBanner}>
         <Text style={Hstyles.appName}>DelishGo</Text>
-
-        {(activeTab === 'Food' || activeTab === 'Restaurants') && (
-         <GoToCart />
-        )}
-
-        <Text style={Hstyles.quote}>"Delivering delights to your doorstep"</Text>
+        {(activeTab === 'Food' || activeTab === 'Restaurants') && <GoToCart />}
+        <Text style={Hstyles.tagline}>"Delivering delights to your doorstep"</Text>
       </View>
 
+      {/* Content */}
       <View style={Hstyles.content}>
         {loading ? (
-          <ActivityIndicator size="large" color="#FF6F00" style={{ marginTop: 20 }} />
+          <ActivityIndicator size="large" color="#FF6F00" style={{ marginTop: 40 }} />
         ) : (
-          <ScrollView contentContainerStyle={Hstyles.scrollArea}>
-            {activeTab === 'Food' && (
-              <View>
-                <Text style={Hstyles.sectionTitle}>Food Items</Text>
-                <View style={Hstyles.itemRowWrap}>
-                  {foodItems.map(item => (
-                    <FoodCard
-                      key={item.id}
-                      label={item.name}
-                      image={imageMap[item.image]}
-                      onPress={() => navigation.navigate('FoodItems', {
-                        category: item.name,
-                      })}
-                    />
-                  ))}
-                </View>
+          <Animated.View style={{ opacity: fadeAnim }}>
+            <ScrollView contentContainerStyle={Hstyles.scrollArea}>
+              {/* Food */}
+              {activeTab === 'Food' && (
+                <>
+                  <Text style={Hstyles.sectionTitle}>🍽️ Popular Dishes</Text>
+                  <View style={Hstyles.cardRow}>
+                    {foodItems.length ? (
+                      foodItems.map((item) => (
+                        <FoodCard
+                          key={item.id}
+                          label={item.name}
+                          image={imageMap[item.image]}
+                          onPress={() =>
+                            navigation.navigate('FoodItems', { category: item.name })
+                          }
+                        />
+                      ))
+                    ) : (
+                      <Text style={Hstyles.empty}>No dishes available</Text>
+                    )}
+                  </View>
 
-                <Text style={Hstyles.sectionTitle}>Nearby Restaurants</Text>
-                {restaurants.map(rest => (
-                  <RestaurantCard
-                    key={rest.id}
-                    name={rest.name}
-                    type={rest.type}
-                    time={rest.time}
-                    image={imageMap[rest.image]}
-                    onPress={() => navigation.navigate('RestaurantDetails', {
-                      restaurantId: rest.id,
-                      restaurantData: rest
-                    })}
-                  />
-                ))}
-              </View>
-            )}
-
-            {activeTab === 'Restaurants' && (
-              <View>
-                <Text style={Hstyles.sectionTitle}>All Restaurants</Text>
-                {restaurants.map(rest => (
-                  <RestaurantCard
-                    key={rest.id}
-                    name={rest.name}
-                    type={rest.type}
-                    time={rest.time}
-                    image={imageMap[rest.image]}
-                    onPress={() => navigation.navigate('RestaurantDetails', {
-                      restaurantId: rest.id,
-                      restaurantData: rest
-                    })}
-                  />
-                ))}
-              </View>
-            )}
-
-            {activeTab === 'Orders' && (
-              <View>
-                <Text style={Hstyles.sectionTitle}>Your Orders</Text>
-                {orders.length === 0 ? (
-                  <Text style={Hstyles.empty}>You have no orders yet.</Text>
-                ) : (
-                  orders.map(order => (
-                    <View key={order.id} style={Hstyles.orderCard}>
-                      <Text style={Hstyles.orderHeading}>Order ID: {order.id}</Text>
-                      <Text style={Hstyles.orderSub}>Placed: {formatTimestamp(order.timestamp)}</Text>
-                      <Text style={Hstyles.orderSub}>Est. Delivery: 30-40 mins</Text>
-
-                      <Text style={Hstyles.orderSub}>Items:</Text>
-                      {order.items.map((item, index) => (
-                        <Text key={index} style={Hstyles.orderItem}>
-                          - {item.name} x {item.quantity}
-                        </Text>
-                      ))}
-
-                      <Text style={Hstyles.orderSub}>Total: ₹{order.total}</Text>
-
-                      <Text style={Hstyles.orderSub}>Delivery Address:</Text>
-                      <Text style={Hstyles.orderAddress}>
-                        {order.address?.lane1}, {order.address?.lane2}{'\n'}
-                        {order.address?.city}, {order.address?.district}, {order.address?.state} - {order.address?.pincode}
-                      </Text>
-                    </View>
-                  ))
-                )}
-              </View>
-            )}
-
-            {activeTab === 'Profile' && (
-              <View>
-                <Text style={Hstyles.sectionTitle}>Your Profile</Text>
-                <View style={{ padding: 10 }}>
-                  <Text style={Hstyles.profileText}>Name: {userProfile?.name || 'N/A'}</Text>
-                  <Text style={Hstyles.profileText}>Phone: {userProfile?.phone || 'N/A'}</Text>
-                  <Text style={Hstyles.profileText}>Email: {auth().currentUser?.email || 'Not logged in'}</Text>
-                  <Text style={Hstyles.profileText}>Address:</Text>
-                  {userProfile?.address ? (
-                    <Text style={Hstyles.profileText}>
-                      {userProfile.address.lane1}, {userProfile.address.lane2}{'\n'}
-                      {userProfile.address.city}, {userProfile.address.district}{'\n'}
-                      {userProfile.address.state} - {userProfile.address.pincode}
-                    </Text>
+                  <Text style={Hstyles.sectionTitle}>🏬 Restaurants Around You</Text>
+                  {restaurants.length ? (
+                    restaurants.map((rest) => (
+                      <RestaurantCard
+                        key={rest.id}
+                        name={rest.name}
+                        type={rest.type}
+                        time={rest.time}
+                        image={imageMap[rest.image]}
+                        onPress={() =>
+                          navigation.navigate('RestaurantDetails', {
+                            restaurantId: rest.id,
+                            restaurantData: rest,
+                          })
+                        }
+                      />
+                    ))
                   ) : (
-                    <Text style={Hstyles.profileText}>No address found</Text>
+                    <Text style={Hstyles.empty}>No restaurants available</Text>
                   )}
-                </View>
+                </>
+              )}
 
-                <TouchableOpacity
-                  style={Hstyles.logoutButton}
-                  onPress={async () => {
-                    await auth().signOut();
-                    navigation.replace('Login');
-                  }}
-                >
-                  <Text style={Hstyles.logoutText}>Sign Out</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </ScrollView>
+              {/* Restaurants */}
+              {activeTab === 'Restaurants' && (
+                <>
+                  <Text style={Hstyles.sectionTitle}>🏠 All Restaurants</Text>
+                  {restaurants.length ? (
+                    restaurants.map((rest) => (
+                      <RestaurantCard
+                        key={rest.id}
+                        name={rest.name}
+                        type={rest.type}
+                        time={rest.time}
+                        image={imageMap[rest.image]}
+                        onPress={() =>
+                          navigation.navigate('RestaurantDetails', {
+                            restaurantId: rest.id,
+                            restaurantData: rest,
+                          })
+                        }
+                      />
+                    ))
+                  ) : (
+                    <Text style={Hstyles.empty}>No restaurants available</Text>
+                  )}
+                </>
+              )}
+
+              {/* Orders */}
+              {activeTab === 'Orders' && (
+                <>
+                  <Text style={Hstyles.sectionTitle}>🧾 Order History</Text>
+                  {orders.length ? (
+                    orders.map((order) => (
+                      <View key={order.id} style={Hstyles.orderCard}>
+                        <Text style={Hstyles.orderHeading}>Order #{order.id}</Text>
+                        <Text style={Hstyles.orderSub}>Date: {formatTimestamp(order.timestamp)}</Text>
+                        <Text style={Hstyles.orderSub}>Items:</Text>
+                        {order.items.map((item, i) => (
+                          <Text key={i} style={Hstyles.orderItem}>
+                            • {item.name} x {item.quantity}
+                          </Text>
+                        ))}
+                        <Text style={Hstyles.orderSub}>Total: ₹{order.total}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={Hstyles.empty}>No recent orders.</Text>
+                  )}
+                </>
+              )}
+
+              {/* Profile */}
+              {activeTab === 'Profile' && (
+                <>
+                  <Text style={Hstyles.sectionTitle}>👤 Your Profile</Text>
+                  <View style={Hstyles.profileContainer}>
+                    <Text style={Hstyles.profileText}>Name: {userProfile?.name || 'N/A'}</Text>
+                    <Text style={Hstyles.profileText}>Phone: {userProfile?.phone || 'N/A'}</Text>
+                    <Text style={Hstyles.profileText}>Email: {auth().currentUser?.email}</Text>
+                    <Text style={Hstyles.profileText}>Address:</Text>
+                    {userProfile?.address ? (
+                      <Text style={Hstyles.profileText}>
+                        {userProfile.address.lane1}, {userProfile.address.lane2}{'\n'}
+                        {userProfile.address.city}, {userProfile.address.state} - {userProfile.address.pincode}
+                      </Text>
+                    ) : (
+                      <Text style={Hstyles.profileText}>No address found</Text>
+                    )}
+                  </View>
+
+                  <TouchableOpacity
+                    style={Hstyles.logoutButton}
+                    onPress={async () => {
+                      await auth().signOut();
+                      navigation.replace('Login');
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={Hstyles.logoutText}>🚪 Sign Out</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </ScrollView>
+          </Animated.View>
         )}
       </View>
 
+      {/* Bottom Navigation */}
       <View style={Hstyles.bottomNav}>
         <NavButton
           icon={imageMap.foodIcon}
           label="Food"
           active={activeTab === 'Food'}
-          onPress={() => navigateTo('Food')}
+          onPress={() => setActiveTab('Food')}
         />
         <NavButton
           icon={imageMap.restaurantIcon}
           label="Restaurants"
           active={activeTab === 'Restaurants'}
-          onPress={() => navigateTo('Restaurants')}
+          onPress={() => setActiveTab('Restaurants')}
         />
         <NavButton
           icon={imageMap.orderIcon}
           label="Orders"
           active={activeTab === 'Orders'}
-          onPress={() => navigateTo('Orders')}
+          onPress={() => setActiveTab('Orders')}
         />
         <NavButton
           icon={imageMap.profileIcon}
           label="Profile"
           active={activeTab === 'Profile'}
-          onPress={() => navigateTo('Profile')}
+          onPress={() => setActiveTab('Profile')}
         />
       </View>
     </View>
   );
 };
 
-const FoodCard = ({ label, image, onPress }) => (
-  <TouchableOpacity style={Hstyles.card} onPress={onPress}>
-    <Image source={image} style={Hstyles.cardImage} />
-    <Text style={Hstyles.cardLabel}>{label}</Text>
-  </TouchableOpacity>
-);
+/** Reusable Cards */
+const FoodCard = ({ label, image, onPress }) => {
+  const scaleAnim = useState(new Animated.Value(1))[0];
 
-const RestaurantCard = ({ name, type, time, image, onPress }) => (
-  <TouchableOpacity style={Hstyles.restaurantCard} onPress={onPress}>
-    <Image source={image} style={Hstyles.restaurantImage} />
-    <Text style={Hstyles.restaurantName}>{name}</Text>
-    <Text style={Hstyles.restaurantInfo}>{type} • {time}</Text>
-  </TouchableOpacity>
-);
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
 
-const NavButton = ({ icon, label, active, onPress }) => (
-  <TouchableOpacity style={Hstyles.navItem} onPress={onPress}>
-    <Image source={icon} style={[Hstyles.navIcon, active && Hstyles.navIconActive]} />
-    <Text style={[Hstyles.navLabel, active && Hstyles.navLabelActive]}>{label}</Text>
-  </TouchableOpacity>
-);
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
 
+  return (
+    <TouchableOpacity
+      style={[Hstyles.foodCard, { transform: [{ scale: scaleAnim }] }]}
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={0.9}
+    >
+      <Image source={image} style={Hstyles.cardImage} />
+      <Text style={Hstyles.cardLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const RestaurantCard = ({ name, type, time, image, onPress }) => {
+  const scaleAnim = useState(new Animated.Value(1))[0];
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <TouchableOpacity
+      style={[Hstyles.restaurantCard, { transform: [{ scale: scaleAnim }] }]}
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={0.9}
+    >
+      <Image source={image} style={Hstyles.restaurantImage} />
+      <Text style={Hstyles.restaurantName}>{name}</Text>
+      <Text style={Hstyles.restaurantInfo}>{type} • {time}</Text>
+    </TouchableOpacity>
+  );
+};
+
+const NavButton = ({ icon, label, active, onPress }) => {
+  const scaleAnim = useState(new Animated.Value(1))[0];
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.9,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <TouchableOpacity
+      style={[Hstyles.navItem, { transform: [{ scale: scaleAnim }] }]}
+      onPress={onPress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={0.7}
+    >
+      <Image source={icon} style={[Hstyles.navIcon, active && Hstyles.navIconActive]} />
+      <Text style={[Hstyles.navLabel, active && Hstyles.navLabelActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+};
 
 export default Home;

@@ -13,16 +13,26 @@ import imageMap from '../assets/imageMap';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/CartSlice';
 import { useNavigation } from '@react-navigation/native';
+import GoToCart from '../components/GoToCart';
 
 const RestaurantDetails = ({ route }) => {
   const { restaurantData } = route.params;
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [quantities, setQuantities] = useState({});
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const handleAddToCart = (item) => {
-    dispatch(addToCart(item));
+    const quantity = quantities[item.id] || 1;
+    dispatch(addToCart({ ...item, quantity }));
+  };
+
+  const handleQuantityChange = (itemId, change) => {
+    setQuantities(prev => {
+      const newQty = Math.max((prev[itemId] || 1) + change, 1);
+      return { ...prev, [itemId]: newQty };
+    });
   };
 
   useEffect(() => {
@@ -36,6 +46,11 @@ const RestaurantDetails = ({ route }) => {
 
         const menu = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setMenuItems(menu);
+
+        // Initialize quantities
+        const qtyInit = {};
+        menu.forEach(dish => (qtyInit[dish.id] = 1));
+        setQuantities(qtyInit);
       } catch (e) {
         console.log('Error loading menu:', e);
       } finally {
@@ -47,18 +62,21 @@ const RestaurantDetails = ({ route }) => {
   }, [restaurantData]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      {/* Top Bar with Cart Icon */}
+    <View style={{ flex: 1, backgroundColor: '#FFF7F2' }}>
+      {/* Top Bar */}
       <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Image source={require('../assets/back.jpg')} style={styles.backImage} />
+        </TouchableOpacity>
+
         <Text style={styles.topBarTitle}>{restaurantData.name}</Text>
-        <TouchableOpacity
-            style={styles.cartIconButton}
-            
-            onPress={() => navigation.navigate('Cart')}
-          >
-            <Image source={imageMap.cartIcon} style={styles.cartIcon} />
-          </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.cartButton}>
+          <Image source={imageMap.cartIcon} style={styles.cartImage} />
+        </TouchableOpacity>
       </View>
+
+      <GoToCart />
 
       <ScrollView contentContainerStyle={styles.container}>
         <Image source={imageMap[restaurantData.image]} style={styles.image} />
@@ -86,6 +104,18 @@ const RestaurantDetails = ({ route }) => {
                 <Text style={styles.menuName}>{dish.name}</Text>
                 <Text style={styles.menuDescription}>{dish.description}</Text>
                 <Text style={styles.menuPrice}>₹{dish.price}</Text>
+
+                {/* Quantity Control */}
+                <View style={styles.quantityRow}>
+                  <TouchableOpacity onPress={() => handleQuantityChange(dish.id, -1)} style={styles.qtyBtn}>
+                    <Text style={styles.qtyText}>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.qtyNumber}>{quantities[dish.id] || 1}</Text>
+                  <TouchableOpacity onPress={() => handleQuantityChange(dish.id, 1)} style={styles.qtyBtn}>
+                    <Text style={styles.qtyText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+
                 <TouchableOpacity onPress={() => handleAddToCart(dish)}>
                   <Text style={styles.addToCart}>Add to Cart</Text>
                 </TouchableOpacity>
@@ -101,24 +131,35 @@ const RestaurantDetails = ({ route }) => {
 const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingTop: 50,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingBottom: 12,
     backgroundColor: '#fff',
     elevation: 3,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    justifyContent: 'space-between',
   },
-  topBarTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FF6F00',
-  },
-  cartIconButton: {
+  backButton: {
     padding: 6,
   },
-  cartIcon: {
+  backImage: {
+    width: 24,
+    height: 24,
+  },
+  topBarTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF6F00',
+    flex: 1,
+    textAlign: 'center',
+    marginRight: 32,
+  },
+  cartButton: {
+    padding: 6,
+  },
+  cartImage: {
     width: 24,
     height: 24,
     tintColor: '#FF6F00',
@@ -176,6 +217,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
+  quantityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  qtyBtn: {
+    backgroundColor: '#ddd',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  qtyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  qtyNumber: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    fontWeight: '600',
+  },
   addToCart: {
     backgroundColor: '#FF6F00',
     padding: 6,
@@ -185,20 +246,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
   },
-
-cartIconButton: {
-  position: 'absolute',
-  right: 20,
-  top: 55,
-  zIndex: 10,
-},
-cartIcon: {
-  width: 26,
-  height: 26,
-  tintColor: '#fff',
-},
-
-
 });
 
 export default RestaurantDetails;
