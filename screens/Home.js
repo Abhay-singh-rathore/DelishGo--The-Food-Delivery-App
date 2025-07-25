@@ -212,14 +212,14 @@ const Home = ({ navigation }) => {
                   </View>
 
                   <TouchableOpacity
-                    style={Hstyles.logoutButton}
+                    style={Hstyles.signOutBtn}
                     onPress={async () => {
                       await auth().signOut();
                       navigation.replace('Login');
                     }}
                     activeOpacity={0.7}
                   >
-                    <Text style={Hstyles.logoutText}>🚪 Sign Out</Text>
+                    <Text style={Hstyles.signOutText}>🚪 Sign Out</Text>
                   </TouchableOpacity>
                 </>
               )}
